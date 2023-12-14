@@ -1,23 +1,30 @@
 import React, { useRef, useCallback, useState } from 'react';
 import Webcam from 'react-webcam';
-import Tesseract from 'tesseract.js';
+import Quagga from '@ericblade/quagga2'; // Import Quagga2
 
 const App = () => {
   const webcamRef = useRef(null);
-  const [ocrText, setOcrText] = useState(''); // State to store OCR results
+  const [qrCode, setQrCode] = useState(''); // State to store QR code results
 
   const capture = useCallback(() => {
     const imageSrc = webcamRef.current.getScreenshot();
     if (imageSrc) {
-      Tesseract.recognize(
-        imageSrc,
-        'eng',
-        {
-          logger: m => console.log(m),
+      Quagga.decodeSingle({
+        src: imageSrc,
+        numOfWorkers: 0,  // Needs to be 0 when used in Node
+        inputStream: {
+          size: 800  // restrict input-size to be 800px in width (long-side)
+        },
+        decoder: {
+          readers: ["qr_reader"]  // Use QR code reader
+        },
+      }, (result) => {
+        if (result && result.codeResult) {
+          console.log(result.codeResult.code);
+          setQrCode(result.codeResult.code); // Update state with QR code results
+        } else {
+          console.log("No QR code detected");
         }
-      ).then(({ data: { text } }) => {
-        console.log(text);
-        setOcrText(text); // Update state with OCR results
       });
     }
   }, [webcamRef]);
@@ -38,10 +45,10 @@ const App = () => {
         width={1280}
         videoConstraints={videoConstraints}
       />
-      <button onClick={capture}>Capture</button>
+      <button onClick={capture}>Capture QR Code</button>
       <div>
-        <h2>OCR Results:</h2>
-        <p>{ocrText}</p> {/* Display OCR results here */}
+        <h2>QR Code Results:</h2>
+        <p>{qrCode}</p> {/* Display QR code results here */}
       </div>
     </div>
   );
