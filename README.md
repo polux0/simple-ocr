@@ -1,4 +1,6 @@
-# Getting Started with Create React App
+# quagga2-react-example
+
+Showcasing Quagga2 in combination with ReactJS
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
